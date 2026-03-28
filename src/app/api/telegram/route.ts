@@ -86,11 +86,18 @@ interface TelegramPost {
 // Persist latest known post IDs across requests (in-memory cache)
 const latestKnownIds: Record<string, number> = {};
 // Cache of fetched posts so we don't re-fetch
-const postCache: Record<string, { text: string; textDisplay?: string; date: string }> = {};
+const postCache: Record<string, { text: string; textDisplay?: string; date: string; displayTranslated?: boolean }> = {};
 
 async function fetchPost(channel: string, postId: number): Promise<{ text: string; textDisplay?: string; date: string } | null> {
   const cacheKey = `${channel}/${postId}`;
-  if (postCache[cacheKey]) return postCache[cacheKey];
+  if (postCache[cacheKey]) {
+    const cached = postCache[cacheKey];
+    if (!cached.displayTranslated) {
+      cached.textDisplay = await translateFreeText(cached.text, 'ru');
+      cached.displayTranslated = true;
+    }
+    return cached;
+  }
 
   try {
     const res = await fetch(`https://t.me/${channel}/${postId}?embed=1&mode=tme`, {
@@ -135,7 +142,7 @@ async function fetchPost(channel: string, postId: number): Promise<{ text: strin
       textDisplay = await translateFreeText(text, 'ru');
     }
 
-    const result = { text, textDisplay, date };
+    const result = { text, textDisplay, date, displayTranslated: true };
     postCache[cacheKey] = result;
     return result;
   } catch {

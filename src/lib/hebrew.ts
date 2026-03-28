@@ -174,10 +174,20 @@ export async function translateFreeText(text: string, target: TranslationTarget 
  * Batch translate multiple strings to the selected target language
  */
 export async function translateBatch(texts: string[], target: TranslationTarget = 'en'): Promise<string[]> {
-  const results = await Promise.allSettled(
-    texts.map(t => translateFreeText(t, target))
-  );
-  return results.map((r, i) =>
-    r.status === 'fulfilled' ? r.value : texts[i]
-  );
+  const results: string[] = new Array(texts.length);
+  const batchSize = 8;
+
+  for (let i = 0; i < texts.length; i += batchSize) {
+    const chunk = texts.slice(i, i + batchSize);
+    const chunkResults = await Promise.allSettled(
+      chunk.map(t => translateFreeText(t, target))
+    );
+
+    chunkResults.forEach((result, index) => {
+      const originalIndex = i + index;
+      results[originalIndex] = result.status === 'fulfilled' ? result.value : texts[originalIndex];
+    });
+  }
+
+  return results;
 }
