@@ -1,5 +1,6 @@
 'use client';
 
+import { CRYPTO_NAME_LABELS, getDisplayLabel } from '@/lib/displayLabels';
 import { useDataFeed } from '@/lib/hooks';
 
 interface CryptoData {
@@ -24,7 +25,7 @@ export default function CryptoPanel() {
     <div className="panel h-full flex flex-col">
       <div className="panel-header">
         <span className="status-dot" style={{ background: '#f7931a' }} />
-        CRYPTO MARKETS
+        КРИПТОРЫНКИ
       </div>
       <div className="flex-1 overflow-y-auto">
         {loading ? (
@@ -38,7 +39,7 @@ export default function CryptoPanel() {
             <div key={i} className="data-row flex items-center justify-between">
               <div>
                 <div className="text-[11px] font-medium text-[var(--text-primary)]">
-                  {item.name}
+                  {getDisplayLabel(item.name, CRYPTO_NAME_LABELS)}
                 </div>
                 <div className="text-[9px] font-bold" style={{ color: SYMBOL_COLORS[item.symbol] || 'var(--text-secondary)' }}>
                   {item.symbol}
@@ -46,7 +47,7 @@ export default function CryptoPanel() {
               </div>
               <div className="text-right">
                 <div className={`text-sm font-bold ${item.error ? 'text-[var(--text-secondary)]' : ''}`}>
-                  {item.error ? 'N/A' : `$${item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                  {item.error ? 'Н/Д' : `$${item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                 </div>
                 {!item.error && (
                   <div className={`text-[10px] ${item.changePercent >= 0 ? 'value-up' : 'value-down'}`}>

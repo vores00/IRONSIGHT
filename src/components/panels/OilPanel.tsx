@@ -1,5 +1,6 @@
 'use client';
 
+import { COMMODITY_TYPE_LABELS, ENERGY_NAME_LABELS, getDisplayLabel } from '@/lib/displayLabels';
 import { useDataFeed, formatPrice, formatChange } from '@/lib/hooks';
 
 interface OilData {
@@ -18,7 +19,7 @@ export default function OilPanel() {
     <div className="panel h-full flex flex-col">
       <div className="panel-header">
         <span className="status-dot" />
-        ENERGY MARKETS
+        ЭНЕРГОРЫНКИ
       </div>
       <div className="flex-1 overflow-y-auto">
         {loading ? (
@@ -32,15 +33,15 @@ export default function OilPanel() {
             <div key={i} className="data-row flex items-center justify-between">
               <div>
                 <div className="text-[11px] font-medium text-[var(--text-primary)]">
-                  {item.name}
+                  {getDisplayLabel(item.name, ENERGY_NAME_LABELS)}
                 </div>
                 <div className="text-[9px] text-[var(--text-secondary)] uppercase">
-                  {item.type.replace('_', ' ')}
+                  {getDisplayLabel(item.type, COMMODITY_TYPE_LABELS)}
                 </div>
               </div>
               <div className="text-right">
                 <div className={`text-sm font-bold ${item.error ? 'text-[var(--text-secondary)]' : ''}`}>
-                  {item.error ? 'N/A' : `$${formatPrice(item.price)}`}
+                  {item.error ? 'Н/Д' : `$${formatPrice(item.price)}`}
                 </div>
                 {!item.error && (
                   <div

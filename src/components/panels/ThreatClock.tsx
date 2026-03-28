@@ -23,7 +23,7 @@ export default function ThreatClock() {
   if (!time) {
     return (
       <div className="flex items-center gap-4 px-4 py-1.5">
-        <span className="text-[9px] text-[var(--text-secondary)]">Loading clocks...</span>
+        <span className="text-[9px] text-[var(--text-secondary)]">Загрузка часов...</span>
       </div>
     );
   }
@@ -33,12 +33,12 @@ export default function ThreatClock() {
   return (
     <div className="flex items-center gap-4 px-4 py-1.5 overflow-x-auto">
       <div className="flex items-center gap-2 shrink-0">
-        <span className="text-[9px] text-[var(--text-secondary)] tracking-widest">ZULU</span>
+        <span className="text-[9px] text-[var(--text-secondary)] tracking-widest">UTC</span>
         <span className="text-xs font-bold text-[var(--cyan)] glow-text font-mono">{utc}Z</span>
       </div>
       <div className="h-4 w-px bg-[var(--border-color)]" />
       {TIME_ZONES.map((tz, i) => {
-        const localTime = time.toLocaleTimeString('en-US', {
+        const localTime = time.toLocaleTimeString('ru-RU', {
           timeZone: tz.zone,
           hour: '2-digit',
           minute: '2-digit',

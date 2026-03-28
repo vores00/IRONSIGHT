@@ -1,5 +1,6 @@
 'use client';
 
+import { NAVAL_GROUP_LABELS, NAVAL_REGION_LABELS, NAVAL_STATUS_LABELS, NAVAL_TYPE_LABELS, NAVY_LABELS, getDisplayLabel } from '@/lib/displayLabels';
 import { useDataFeed } from '@/lib/hooks';
 
 interface NavalVessel {
@@ -69,9 +70,9 @@ export default function NavalPanel() {
     <div className="panel h-full flex flex-col">
       <div className="panel-header">
         <span className="status-dot" style={{ background: 'var(--blue)' }} />
-        NAVAL TRACKER
+        МОРСКОЙ ТРЕКЕР
         <span className="ml-auto text-[9px] text-[var(--text-secondary)] font-normal normal-case tracking-normal">
-          {data?.totalTracked || 0} vessels // OSINT
+          {data?.totalTracked || 0} судов // OSINT
         </span>
       </div>
 
@@ -81,7 +82,7 @@ export default function NavalPanel() {
           const count = data?.ships.filter(s => s.region === region).length || 0;
           return count > 0 ? (
             <div key={region} className="text-[8px] text-[var(--text-secondary)]">
-              <span className="text-[var(--cyan)]">{count}</span> {region}
+              <span className="text-[var(--cyan)]">{count}</span> {getDisplayLabel(region, NAVAL_REGION_LABELS)}
             </div>
           ) : null;
         })}
@@ -99,7 +100,7 @@ export default function NavalPanel() {
             <div key={navy}>
               <div className="px-3 pt-2 pb-1">
                 <span className="text-[9px] tracking-widest font-bold" style={{ color: NAVY_COLORS[navy] || 'var(--text-secondary)' }}>
-                  {navy.toUpperCase()} ({byNavy[navy].length})
+                  {getDisplayLabel(navy, NAVY_LABELS).toUpperCase()} ({byNavy[navy].length})
                 </span>
               </div>
               {byNavy[navy].map((ship, i) => (
@@ -126,14 +127,14 @@ export default function NavalPanel() {
                           backgroundColor: ship.status === 'Active' ? 'rgba(0,255,136,0.1)' : 'rgba(0,212,255,0.1)',
                         }}
                       >
-                        {ship.status}
+                        {getDisplayLabel(ship.status, NAVAL_STATUS_LABELS)}
                       </span>
                       <span className="text-[8px] text-[var(--text-secondary)]">📍</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between text-[8px] text-[var(--text-secondary)]">
-                    <span>{ship.class} • {ship.type}</span>
-                    <span>{ship.region}{ship.group ? ` • ${ship.group}` : ''}</span>
+                    <span>{ship.class} • {getDisplayLabel(ship.type, NAVAL_TYPE_LABELS)}</span>
+                    <span>{getDisplayLabel(ship.region, NAVAL_REGION_LABELS)}{ship.group ? ` • ${getDisplayLabel(ship.group, NAVAL_GROUP_LABELS)}` : ''}</span>
                   </div>
                 </div>
               ))}

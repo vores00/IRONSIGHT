@@ -38,11 +38,11 @@ export default function PolymarketPanel() {
       <div className="panel-header flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="status-dot" style={{ background: '#5affb0' }} />
-          PREDICTION MARKETS
+          РЫНКИ ПРОГНОЗОВ
         </div>
         {data && (
           <span className="text-[9px] text-[var(--text-secondary)]">
-            {data.count} markets // Polymarket
+            {data.count} рынков // Polymarket
           </span>
         )}
       </div>
@@ -55,7 +55,7 @@ export default function PolymarketPanel() {
           </div>
         ) : !data?.markets?.length ? (
           <div className="p-4 text-center text-[10px] text-[var(--text-secondary)]">
-            No active prediction markets found
+            Активные рынки прогнозов не найдены
           </div>
         ) : (
           data.markets.map((market) => {
@@ -72,9 +72,9 @@ export default function PolymarketPanel() {
                       {market.question}
                     </div>
                     <div className="text-[8px] text-[var(--text-secondary)] mt-0.5">
-                      Vol: {formatVolume(market.volume24hr)} 24h
+                      Объем: {formatVolume(market.volume24hr)} 24ч
                       {' · '}
-                      {formatVolume(market.volumeTotal)} total
+                      {formatVolume(market.volumeTotal)} всего
                     </div>
                   </div>
                   <div className="text-right shrink-0">
@@ -86,7 +86,7 @@ export default function PolymarketPanel() {
                       {yesPrice}%
                     </div>
                     <div className="text-[8px] text-[var(--text-secondary)]">
-                      {yesOutcome?.label || 'YES'}
+                      {yesOutcome?.label || 'ДА'}
                     </div>
                     {changePercent && (
                       <div className={`text-[9px] ${parseFloat(changePercent) >= 0 ? 'value-up' : 'value-down'}`}>

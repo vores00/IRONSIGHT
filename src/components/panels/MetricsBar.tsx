@@ -19,7 +19,7 @@ export default function MetricsBar() {
 
   const metrics = [
     {
-      label: 'WTI CRUDE',
+      label: 'НЕФТЬ WTI',
       value: wti ? `$${formatPrice(wti.price)}` : '---',
       change: wti?.changePercent || 0,
     },
@@ -29,13 +29,13 @@ export default function MetricsBar() {
       change: brent?.changePercent || 0,
     },
     {
-      label: 'NAT GAS',
+      label: 'ПРИР. ГАЗ',
       value: natGas ? `$${formatPrice(natGas.price)}` : '---',
       change: natGas?.changePercent || 0,
     },
     {
-      label: 'THREAT LEVEL',
-      value: 'ELEVATED',
+      label: 'УРОВЕНЬ УГРОЗЫ',
+      value: 'ПОВЫШЕН',
       change: 0,
       isThreat: true,
       threatClass: 'threat-elevated',

@@ -25,9 +25,9 @@ export default function TelegramPanel() {
     <div className="panel h-full flex flex-col">
       <div className="panel-header">
         <span className="status-dot" style={{ background: 'var(--cyan)' }} />
-        TELEGRAM OSINT (UNVERIFIED)
+        OSINT В TELEGRAM (БЕЗ ПОДТВЕРЖДЕНИЯ)
         <span className="ml-auto text-[9px] text-[var(--text-secondary)] font-normal normal-case tracking-normal">
-          {data?.posts.length || 0} posts // {data?.channels.length || 0} channels{lastUpdated ? ` // ${new Date(lastUpdated).toLocaleTimeString()}` : ''}
+          {data?.posts.length || 0} постов // {data?.channels.length || 0} каналов{lastUpdated ? ` // ${new Date(lastUpdated).toLocaleTimeString('ru-RU')}` : ''}
         </span>
       </div>
       <div className="flex-1 overflow-y-auto">
@@ -39,7 +39,7 @@ export default function TelegramPanel() {
           </div>
         ) : data?.posts.length === 0 ? (
           <div className="p-4 text-center text-[var(--text-secondary)] text-xs">
-            No recent Telegram posts
+            Нет свежих постов Telegram
           </div>
         ) : (
           data?.posts.map((post) => (

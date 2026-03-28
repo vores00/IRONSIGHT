@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { COUNTRY_LABELS, getDisplayLabel } from '@/lib/displayLabels';
 import { useDataFeed, timeAgo, useTick } from '@/lib/hooks';
 
 interface CountryEvent {
@@ -40,10 +41,10 @@ const COUNTRY_COLORS: Record<string, string> = {
 };
 
 const LEVEL_CONFIG: Record<string, { color: string; label: string }> = {
-  CLEAR: { color: 'var(--green)', label: 'CLEAR' },
-  MONITORING: { color: 'var(--blue)', label: 'MONITOR' },
-  ALERT: { color: 'var(--amber)', label: 'ALERT' },
-  CRITICAL: { color: 'var(--red)', label: 'CRITICAL' },
+  CLEAR: { color: 'var(--green)', label: 'ЧИСТО' },
+  MONITORING: { color: 'var(--blue)', label: 'МОНИТОРИНГ' },
+  ALERT: { color: 'var(--amber)', label: 'ТРЕВОГА' },
+  CRITICAL: { color: 'var(--red)', label: 'КРИТИЧНО' },
 };
 
 const SEVERITY_COLORS: Record<string, string> = {
@@ -89,9 +90,9 @@ export default function RegionalAlertsPanel() {
             animation: sorted.some(a => a.level === 'CRITICAL') ? 'pulse-dot 0.5s ease-in-out infinite' : undefined,
           }}
         />
-        REGIONAL THREAT MONITOR
+        РЕГИОНАЛЬНЫЙ МОНИТОР УГРОЗ
         <span className="ml-auto text-[9px] text-[var(--text-secondary)] font-normal normal-case tracking-normal">
-          {sorted.filter(a => a.level !== 'CLEAR').length} active
+          {sorted.filter(a => a.level !== 'CLEAR').length} активн.
         </span>
       </div>
 
@@ -126,13 +127,13 @@ export default function RegionalAlertsPanel() {
                     </span>
                     <span className="text-xs">{country.flag}</span>
                     <span className="text-[11px] font-bold" style={{ color: countryColor }}>
-                      {country.name}
+                      {getDisplayLabel(country.name, COUNTRY_LABELS)}
                     </span>
                     {hasEvents && (
                       <span className="text-[9px] text-[var(--text-secondary)]">
                         {country.events[0].hoursAgo < 1
-                          ? `${Math.max(1, Math.round(country.events[0].hoursAgo * 60))}m ago`
-                          : `${Math.round(country.events[0].hoursAgo)}h ago`
+                          ? `${Math.max(1, Math.round(country.events[0].hoursAgo * 60))} мин назад`
+                          : `${Math.round(country.events[0].hoursAgo)} ч назад`
                         }
                       </span>
                     )}

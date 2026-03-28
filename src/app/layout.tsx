@@ -3,8 +3,8 @@ import "leaflet/dist/leaflet.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "IRONSIGHT // OSINT Command Center",
-  description: "Real-time geopolitical intelligence monitoring dashboard",
+  title: "IRONSIGHT // OSINT-центр мониторинга",
+  description: "Панель мониторинга геополитической обстановки в реальном времени",
 };
 
 export default function RootLayout({

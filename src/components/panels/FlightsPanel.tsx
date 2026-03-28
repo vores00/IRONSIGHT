@@ -1,5 +1,6 @@
 'use client';
 
+import { COUNTRY_LABELS, FLIGHT_TYPE_LABELS, getDisplayLabel } from '@/lib/displayLabels';
 import { useDataFeed } from '@/lib/hooks';
 
 interface MilFlight {
@@ -74,9 +75,9 @@ export default function FlightsPanel() {
     <div className="panel h-full flex flex-col">
       <div className="panel-header">
         <span className="status-dot" style={{ background: 'var(--cyan)' }} />
-        MIL AIRSPACE
+        ВОЕННАЯ АВИАЦИЯ
         <span className="ml-auto text-[9px] text-[var(--text-secondary)] font-normal normal-case tracking-normal">
-          {data?.military || 0} mil / {data?.total || 0} total // adsb.lol
+          {data?.military || 0} воен. / {data?.total || 0} всего // adsb.lol
         </span>
       </div>
       <div className="flex-1 overflow-y-auto">
@@ -88,8 +89,8 @@ export default function FlightsPanel() {
           </div>
         ) : data?.flights.length === 0 ? (
           <div className="p-4 text-center text-[var(--text-secondary)] text-xs">
-            No military aircraft detected on ADS-B<br />
-            <span className="text-[8px]">(many mil flights disable transponders)</span>
+            Военные борты не обнаружены в ADS-B<br />
+            <span className="text-[8px]">(многие военные борта отключают транспондеры)</span>
           </div>
         ) : (
           <>
@@ -97,7 +98,7 @@ export default function FlightsPanel() {
               <div className="px-3 py-1.5 border-b border-[var(--border-color)] bg-[var(--bg-panel-header)] flex flex-wrap gap-x-3 gap-y-0.5">
                 {Object.entries(byType).sort((a, b) => b[1] - a[1]).map(([type, count]) => (
                   <span key={type} className="text-[8px]" style={{ color: TYPE_COLORS[type] || 'var(--text-secondary)' }}>
-                    {type}: {count}
+                    {getDisplayLabel(type, FLIGHT_TYPE_LABELS)}: {count}
                   </span>
                 ))}
               </div>
@@ -117,24 +118,24 @@ export default function FlightsPanel() {
                     {f.aircraftType && (
                       <span className="text-[8px] text-[var(--text-secondary)] font-mono">{f.aircraftType}</span>
                     )}
-                    <span className="text-[9px] text-[var(--text-secondary)]">{f.origin}</span>
+                    <span className="text-[9px] text-[var(--text-secondary)]">{getDisplayLabel(f.origin, COUNTRY_LABELS)}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     {f.squawk === '7700' && (
-                      <span className="text-[8px] font-bold px-1 py-0.5 rounded bg-red-900/30 text-[var(--red)]">EMERG</span>
+                      <span className="text-[8px] font-bold px-1 py-0.5 rounded bg-red-900/30 text-[var(--red)]">АВАР</span>
                     )}
                     {f.squawk === '7600' && (
-                      <span className="text-[8px] font-bold px-1 py-0.5 rounded bg-amber-900/30 text-[var(--amber)]">NORDO</span>
+                      <span className="text-[8px] font-bold px-1 py-0.5 rounded bg-amber-900/30 text-[var(--amber)]">БЕЗ СВЯЗИ</span>
                     )}
                     {f.isInteresting && !f.isMilitary && (
-                      <span className="text-[8px] font-bold px-1 py-0.5 rounded bg-purple-900/30 text-[var(--purple)]">NOTABLE</span>
+                      <span className="text-[8px] font-bold px-1 py-0.5 rounded bg-purple-900/30 text-[var(--purple)]">ИНТЕРЕСНО</span>
                     )}
                     <span className="text-[8px] text-[var(--text-secondary)]">📍</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-[9px]" style={{ color: TYPE_COLORS[f.type] || 'var(--text-secondary)' }}>
-                    {f.type}
+                    {getDisplayLabel(f.type, FLIGHT_TYPE_LABELS)}
                     {f.registration ? ` (${f.registration})` : ''}
                   </span>
                   <span className="text-[9px] text-[var(--text-secondary)] font-mono">

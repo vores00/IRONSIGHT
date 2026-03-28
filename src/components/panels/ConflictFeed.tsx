@@ -1,5 +1,6 @@
 'use client';
 
+import { CONFLICT_TYPE_LABELS, formatLocationLabel, getDisplayLabel } from '@/lib/displayLabels';
 import { useDataFeed, timeAgo, useTick } from '@/lib/hooks';
 import type { ConflictEvent } from '@/types';
 
@@ -25,9 +26,9 @@ export default function ConflictFeed() {
     <div className="panel h-full flex flex-col">
       <div className="panel-header">
         <span className="status-dot" style={{ background: 'var(--red)' }} />
-        CONFLICT MONITOR
+        МОНИТОР КОНФЛИКТА
         <span className="ml-auto text-[9px] text-[var(--text-secondary)] font-normal normal-case tracking-normal">
-          {events?.length || 0} events
+          {events?.length || 0} событий
         </span>
       </div>
       <div className="flex-1 overflow-y-auto">
@@ -39,7 +40,7 @@ export default function ConflictFeed() {
           </div>
         ) : events?.length === 0 ? (
           <div className="p-4 text-center text-[var(--text-secondary)] text-xs">
-            No recent conflict events reported
+            Нет свежих событий конфликта
           </div>
         ) : (
           events?.map((event, i) => {
@@ -55,10 +56,10 @@ export default function ConflictFeed() {
                       border: `1px solid ${color}30`,
                     }}
                   >
-                    {event.type}
+                    {getDisplayLabel(event.type, CONFLICT_TYPE_LABELS)}
                   </span>
                   <span className="text-[9px] text-[var(--text-secondary)]">
-                    {event.location}
+                    {formatLocationLabel(event.location)}
                   </span>
                   <span className="text-[9px] text-[var(--text-secondary)] ml-auto">
                     {timeAgo(event.date)}
@@ -68,7 +69,7 @@ export default function ConflictFeed() {
                   {event.description}
                 </p>
                 <span className="text-[8px] text-[var(--text-secondary)]">
-                  via {event.source}
+                  источник: {event.source}
                 </span>
               </div>
             );

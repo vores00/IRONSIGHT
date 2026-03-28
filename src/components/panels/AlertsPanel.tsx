@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { ALERT_TYPE_LABELS, STATUS_LABELS, getDisplayLabel } from '@/lib/displayLabels';
 import { useDataFeed } from '@/lib/hooks';
 import { playAlertSound } from '@/lib/generateAlert';
 
@@ -59,8 +60,8 @@ export default function AlertsPanel() {
 
       // Also send browser notification if permitted
       if (Notification.permission === 'granted') {
-        new Notification('IRONSIGHT ALERT', {
-          body: `${data.activeCount} active alert(s) - ${data.alerts[0]?.type}: ${data.alerts[0]?.threat}`,
+        new Notification('Тревога IRONSIGHT', {
+          body: `${data.activeCount} активн. тревог - ${getDisplayLabel(data.alerts[0]?.type, ALERT_TYPE_LABELS)}: ${data.alerts[0]?.threat}`,
           icon: '/favicon.ico',
           tag: 'ironsight-alert',
         });
@@ -92,7 +93,7 @@ export default function AlertsPanel() {
             animation: isActive ? 'pulse-dot 0.5s ease-in-out infinite' : undefined,
           }}
         />
-        ISRAEL ALERT STATUS
+        СТАТУС ТРЕВОГ ИЗРАИЛЯ
         <div className="ml-auto flex items-center gap-2">
           {/* Sound toggle */}
           <button
@@ -108,14 +109,14 @@ export default function AlertsPanel() {
               borderColor: soundEnabled ? 'var(--cyan)' : 'var(--border-color)',
               background: soundEnabled ? 'rgba(0,212,255,0.1)' : 'transparent',
             }}
-            title={soundEnabled ? 'Sound alerts ON' : 'Sound alerts OFF'}
+            title={soundEnabled ? 'Звук тревог ВКЛ' : 'Звук тревог ВЫКЛ'}
           >
             {soundEnabled ? '🔔' : '🔕'}
           </button>
           <span className="text-[9px] font-normal normal-case tracking-normal"
             style={{ color: isActive ? 'var(--red)' : 'var(--green)' }}
           >
-            {isActive ? `${data?.activeCount} ACTIVE` : 'ALL CLEAR'}
+            {isActive ? `${data?.activeCount} ${getDisplayLabel(data?.status, STATUS_LABELS)}` : getDisplayLabel('CLEAR', STATUS_LABELS)}
           </span>
         </div>
       </div>
@@ -133,10 +134,10 @@ export default function AlertsPanel() {
                 <span className="text-lg">🚨</span>
                 <div>
                   <div className="text-xs font-bold text-[var(--red)]">
-                    INCOMING THREAT DETECTED
+                    ОБНАРУЖЕНА УГРОЗА
                   </div>
                   <div className="text-[9px] text-[var(--text-secondary)]">
-                    Pikud HaOref sirens activated
+                    Сработали сирены Pikud HaOref
                   </div>
                 </div>
               </div>
@@ -147,10 +148,10 @@ export default function AlertsPanel() {
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-sm">{TYPE_ICONS[alert.type] || '🔴'}</span>
                   <span className="text-[10px] font-bold text-[var(--red)]">
-                    {alert.type}
+                    {getDisplayLabel(alert.type, ALERT_TYPE_LABELS)}
                   </span>
                   <span className="text-[9px] text-[var(--text-secondary)]">
-                    {new Date(alert.time).toLocaleTimeString()}
+                    {new Date(alert.time).toLocaleTimeString('ru-RU')}
                   </span>
                 </div>
                 <div className="text-[11px] text-[var(--text-primary)]">
@@ -170,15 +171,15 @@ export default function AlertsPanel() {
                 <path d="M9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <div className="text-sm font-bold text-[var(--green)] mb-1">ALL CLEAR</div>
+            <div className="text-sm font-bold text-[var(--green)] mb-1">ЧИСТО</div>
             <div className="text-[9px] text-[var(--text-secondary)] text-center">
-              No active alerts from Pikud HaOref
+              Нет активных тревог от Pikud HaOref
             </div>
             <div className="text-[8px] text-[var(--text-secondary)] mt-2">
-              Polling every 5s • Last: {data?.lastChecked ? new Date(data.lastChecked).toLocaleTimeString() : '...'}
+              Обновление каждые 5с • Последняя проверка: {data?.lastChecked ? new Date(data.lastChecked).toLocaleTimeString('ru-RU') : '...'}
             </div>
             <div className="text-[8px] mt-1" style={{ color: soundEnabled ? 'var(--cyan)' : 'var(--text-secondary)' }}>
-              Sound: {soundEnabled ? 'ON' : 'OFF'} {!hasInteracted && soundEnabled ? '(click anywhere to enable)' : ''}
+              Звук: {soundEnabled ? 'ВКЛ' : 'ВЫКЛ'} {!hasInteracted && soundEnabled ? '(кликните в любом месте, чтобы включить)' : ''}
             </div>
           </div>
         )}

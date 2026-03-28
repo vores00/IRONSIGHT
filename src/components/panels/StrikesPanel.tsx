@@ -1,5 +1,6 @@
 'use client';
 
+import { COUNTRY_LABELS, SEVERITY_LABELS, STRIKE_CATEGORY_LABELS, getDisplayLabel } from '@/lib/displayLabels';
 import { useDataFeed, timeAgo, useTick } from '@/lib/hooks';
 
 interface StrikeEvent {
@@ -44,9 +45,9 @@ export default function StrikesPanel() {
     <div className="panel h-full flex flex-col">
       <div className="panel-header">
         <span className="status-dot" style={{ background: 'var(--red)', animation: 'pulse-dot 1s ease-in-out infinite' }} />
-        MISSILE / STRIKE TRACKER
+        ТРЕКЕР РАКЕТ / УДАРОВ
         <span className="ml-auto text-[9px] text-[var(--text-secondary)] font-normal normal-case tracking-normal">
-          {strikes?.length || 0} events
+          {strikes?.length || 0} событий
         </span>
       </div>
 
@@ -58,7 +59,7 @@ export default function StrikesPanel() {
             <div key={cat} className="flex items-center gap-1 shrink-0">
               <span className="text-xs">{config.icon}</span>
               <span className="text-[9px] font-bold" style={{ color: config.color }}>
-                {cat}
+                {getDisplayLabel(cat, STRIKE_CATEGORY_LABELS)}
               </span>
               <span className="text-[9px] text-[var(--text-secondary)]">({count})</span>
             </div>
@@ -75,7 +76,7 @@ export default function StrikesPanel() {
           </div>
         ) : strikes?.length === 0 ? (
           <div className="p-4 text-center text-[var(--text-secondary)] text-xs">
-            No strike events detected
+            События ударов не обнаружены
           </div>
         ) : (
           strikes?.map((strike, i) => {
@@ -98,7 +99,7 @@ export default function StrikesPanel() {
                       border: `1px solid ${config.color}30`,
                     }}
                   >
-                    {strike.category}
+                    {getDisplayLabel(strike.category, STRIKE_CATEGORY_LABELS)}
                   </span>
                   <span
                     className="text-[8px] font-bold px-1 py-0.5 rounded"
@@ -106,7 +107,7 @@ export default function StrikesPanel() {
                       color: SEVERITY_COLORS[strike.severity],
                     }}
                   >
-                    {strike.severity.toUpperCase()}
+                    {getDisplayLabel(strike.severity, SEVERITY_LABELS)}
                   </span>
                   <span className="text-[9px] text-[var(--text-secondary)] ml-auto">
                     {timeAgo(strike.date)}
@@ -116,7 +117,7 @@ export default function StrikesPanel() {
                   {strike.title}
                 </p>
                 <span className="text-[8px] text-[var(--text-secondary)]">
-                  {strike.source} • {strike.country}
+                  {strike.source} • {getDisplayLabel(strike.country, COUNTRY_LABELS)}
                 </span>
               </a>
             );

@@ -1,5 +1,6 @@
 'use client';
 
+import { INTENSITY_LABELS, formatLocationLabel, getDisplayLabel } from '@/lib/displayLabels';
 import { useDataFeed } from '@/lib/hooks';
 
 interface FireEvent {
@@ -55,7 +56,7 @@ export default function SatellitePanel() {
     <div className="panel h-full flex flex-col">
       <div className="panel-header">
         <span className="status-dot" style={{ background: '#ff6600' }} />
-        SAT THERMAL DETECT
+        ТЕПЛОВЫЕ АНОМАЛИИ
         <span className="ml-auto text-[9px] text-[var(--text-secondary)] font-normal normal-case tracking-normal">
           NASA FIRMS
         </span>
@@ -65,15 +66,15 @@ export default function SatellitePanel() {
       <div className="flex items-center gap-3 px-3 py-1.5 border-b border-[var(--border-color)] bg-[var(--bg-panel-header)]">
         <div className="text-center">
           <div className="text-sm font-bold text-[var(--text-primary)]">{data?.total || 0}</div>
-          <div className="text-[8px] text-[var(--text-secondary)]">HOTSPOTS</div>
+          <div className="text-[8px] text-[var(--text-secondary)]">ОЧАГИ</div>
         </div>
         <div className="text-center">
           <div className="text-sm font-bold" style={{ color: '#ff6600' }}>{data?.highIntensity || 0}</div>
-          <div className="text-[8px] text-[var(--text-secondary)]">HIGH INT</div>
+          <div className="text-[8px] text-[var(--text-secondary)]">ВЫС. ИНТ.</div>
         </div>
         <div className="text-center">
           <div className="text-sm font-bold text-[var(--red)]">{data?.possibleExplosions || 0}</div>
-          <div className="text-[8px] text-[var(--text-secondary)]">FLAGGED</div>
+          <div className="text-[8px] text-[var(--text-secondary)]">ФЛАГ</div>
         </div>
       </div>
 
@@ -86,7 +87,7 @@ export default function SatellitePanel() {
           </div>
         ) : data?.events.length === 0 ? (
           <div className="p-4 text-center text-[var(--text-secondary)] text-xs">
-            No thermal anomalies detected in region
+            В регионе не обнаружены тепловые аномалии
           </div>
         ) : (
           data?.events.slice(0, 30).map((event, i) => {
@@ -102,24 +103,24 @@ export default function SatellitePanel() {
                 />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-medium">{region}</span>
+                    <span className="text-[10px] font-medium">{formatLocationLabel(region)}</span>
                     {event.possibleExplosion && (
                       <span className="text-[8px] font-bold px-1 py-0.5 rounded bg-red-900/30 text-[var(--red)]">
-                        FLAGGED
+                        ФЛАГ
                       </span>
                     )}
                   </div>
                   <div className="text-[9px] text-[var(--text-secondary)]">
                     FRP: {event.frp} MW | {event.brightness}K |{' '}
                     {event.lat.toFixed(2)}, {event.lon.toFixed(2)} |{' '}
-                    {new Date(event.datetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(event.datetime).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
                   </div>
                 </div>
                 <span
                   className="text-[8px] font-bold shrink-0"
                   style={{ color: INTENSITY_COLORS[event.intensity] }}
                 >
-                  {event.intensity.toUpperCase()}
+                  {getDisplayLabel(event.intensity, INTENSITY_LABELS)}
                 </span>
               </div>
             );

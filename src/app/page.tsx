@@ -60,16 +60,16 @@ export default function Dashboard() {
             <div>
               <h1 className="text-sm font-bold tracking-[3px] text-[var(--cyan)]">IRONSIGHT</h1>
               <p className="text-[8px] text-[var(--text-secondary)] tracking-[2px]">
-                OSINT COMMAND CENTER // UNCLASSIFIED
+                ЦЕНТР OSINT-МОНИТОРИНГА // БЕЗ ГРИФА
               </p>
             </div>
           </div>
           <MetricsBar />
           <div className="flex items-center gap-4 text-[9px] text-[var(--text-secondary)]">
-            <span>SESSION {formatUptime(uptime)}</span>
+            <span>СЕССИЯ {formatUptime(uptime)}</span>
             <span className="flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--green)] animate-pulse" />
-              LIVE
+              ОНЛАЙН
             </span>
           </div>
         </div>
@@ -135,11 +135,11 @@ export default function Dashboard() {
 
       {/* Bottom status bar */}
       <footer className="border-t border-[var(--border-color)] bg-[var(--bg-secondary)] px-4 py-1 flex items-center justify-between text-[9px] text-[var(--text-secondary)] shrink-0">
-        <span>FEEDS: NEWS | GDELT | TELEGRAM | OPENSKY | OCHA | YAHOO FIN | PIKUD HAOREF | NASA FIRMS | ADSB.LOL</span>
+        <span>ЛЕНТЫ: НОВОСТИ | GDELT | TELEGRAM | OPENSKY | OCHA | YAHOO FIN | PIKUD HAOREF | NASA FIRMS | ADSB.LOL</span>
         <div className="flex items-center gap-4">
-          <span>ALERTS: 5s | NEWS: 2m | MARKETS: 5m</span>
-          <span>ALL DATA: PUBLIC / OSINT</span>
-          <span>CLASSIFICATION: UNCLASSIFIED // FOUO</span>
+          <span>ТРЕВОГИ: 5с | НОВОСТИ: 2м | РЫНКИ: 5м</span>
+          <span>ВСЕ ДАННЫЕ: ПУБЛИЧНЫЕ / OSINT</span>
+          <span>КЛАССИФИКАЦИЯ: БЕЗ ГРИФА // FOUO</span>
         </div>
       </footer>
     </div>

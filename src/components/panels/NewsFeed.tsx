@@ -34,9 +34,9 @@ export default function NewsFeed() {
     <div className="panel h-full flex flex-col">
       <div className="panel-header">
         <span className="status-dot" />
-        LIVE INTEL FEED
+        ЛЕНТА РАЗВЕДДАННЫХ
         <span className="ml-auto text-[9px] text-[var(--text-secondary)] font-normal normal-case tracking-normal">
-          {news?.length || 0} items · {lastUpdated ? lastUpdated.toLocaleTimeString() : '—'}
+          {news?.length || 0} материалов · {lastUpdated ? lastUpdated.toLocaleTimeString('ru-RU') : '—'}
         </span>
       </div>
       <div className="flex-1 overflow-y-auto">

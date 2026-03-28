@@ -1,6 +1,20 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import {
+  ALERT_TYPE_LABELS,
+  CONFLICT_TYPE_LABELS,
+  COUNTRY_LABELS,
+  FLIGHT_TYPE_LABELS,
+  LOCATION_LABELS,
+  NAVAL_GROUP_LABELS,
+  NAVAL_REGION_LABELS,
+  NAVAL_STATUS_LABELS,
+  NAVAL_TYPE_LABELS,
+  NAVY_LABELS,
+  STRIKE_CATEGORY_LABELS,
+  getDisplayLabel,
+} from '@/lib/displayLabels';
 import { useDataFeed } from '@/lib/hooks';
 
 let L: typeof import('leaflet') | null = null;
@@ -520,7 +534,7 @@ export default function ConflictMap({ className }: MapProps) {
         alerts.alerts.forEach(a => {
           a.locations.forEach(loc => {
             if (loc.toLowerCase().trim() === cityKey) {
-              activeAlerts.push(`${a.type}: ${a.threat}`);
+              activeAlerts.push(`${getDisplayLabel(a.type, ALERT_TYPE_LABELS)}: ${a.threat}`);
             }
           });
         });
@@ -529,22 +543,22 @@ export default function ConflictMap({ className }: MapProps) {
       // Build popup HTML
       let html = `<div style="font-family:monospace;font-size:11px;color:#000;min-width:220px;max-width:300px;max-height:250px;overflow-y:auto;">`;
       html += `<strong style="font-size:13px;">${city.name}</strong><br/>`;
-      html += `<span style="color:#666;">${city.country}${city.capital ? ' (Capital)' : ''}</span>`;
+      html += `<span style="color:#666;">${getDisplayLabel(city.country, COUNTRY_LABELS)}${city.capital ? ' (Столица)' : ''}</span>`;
 
       if (activeAlerts.length > 0) {
         html += `<div style="margin-top:6px;padding:4px 6px;background:#fff0f0;border:1px solid #ff3366;border-radius:3px;">`;
-        html += `<strong style="color:#ff3366;">ACTIVE ALERTS</strong><br/>`;
+        html += `<strong style="color:#ff3366;">АКТИВНЫЕ ТРЕВОГИ</strong><br/>`;
         activeAlerts.forEach(a => { html += `<span style="color:#cc0000;font-size:10px;">${a}</span><br/>`; });
         html += `</div>`;
       }
 
       if (recentStrikes.length > 0) {
         html += `<div style="margin-top:6px;border-top:1px solid #ddd;padding-top:4px;">`;
-        html += `<strong style="color:#ff6600;font-size:10px;">RECENT EVENTS</strong><br/>`;
+        html += `<strong style="color:#ff6600;font-size:10px;">ПОСЛЕДНИЕ СОБЫТИЯ</strong><br/>`;
         recentStrikes.forEach(s => {
-          const timeStr = new Date(s.date).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+          const timeStr = new Date(s.date).toLocaleString('ru-RU', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
           html += `<div style="margin:2px 0;font-size:10px;">`;
-          html += `<span style="color:${s.type === 'STRIKE' ? '#ff3300' : s.type === 'DRONE' ? '#ff6600' : '#666'};font-weight:bold;">${s.type}</span> `;
+          html += `<span style="color:${s.type === 'STRIKE' ? '#ff3300' : s.type === 'DRONE' ? '#ff6600' : '#666'};font-weight:bold;">${getDisplayLabel(s.type, CONFLICT_TYPE_LABELS)}</span> `;
           html += `${s.description.substring(0, 80)}${s.description.length > 80 ? '...' : ''}`;
           html += `<br/><span style="color:#999;font-size:9px;">${s.source} • ${timeStr}</span>`;
           html += `</div>`;
@@ -553,7 +567,7 @@ export default function ConflictMap({ className }: MapProps) {
       }
 
       if (recentStrikes.length === 0 && activeAlerts.length === 0) {
-        html += `<div style="margin-top:4px;color:#999;font-size:10px;">No recent events reported</div>`;
+        html += `<div style="margin-top:4px;color:#999;font-size:10px;">Свежих событий не зафиксировано</div>`;
       }
 
       html += `</div>`;
@@ -623,13 +637,13 @@ export default function ConflictMap({ className }: MapProps) {
       const popupContent = `
         <div style="font-family:monospace;font-size:11px;color:#000;min-width:180px;">
           <strong style="color:${color}">${f.callsign || f.icao24}</strong><br/>
-          <strong>${f.type}</strong><br/>
-          ${f.aircraftType ? `Platform: ${f.aircraftType}${f.registration ? ` (${f.registration})` : ''}<br/>` : ''}
-          Origin: ${f.origin}<br/>
-          Alt: ${f.altitude.toLocaleString()} ft<br/>
-          Speed: ${f.speed} kts | Hdg: ${f.heading}°
-          ${f.squawk ? `<br/>Squawk: ${f.squawk}` : ''}
-          <br/><em style="color:#666;font-size:9px;">Click to show flight trail</em>
+          <strong>${getDisplayLabel(f.type, FLIGHT_TYPE_LABELS)}</strong><br/>
+          ${f.aircraftType ? `Платформа: ${f.aircraftType}${f.registration ? ` (${f.registration})` : ''}<br/>` : ''}
+          Происхождение: ${getDisplayLabel(f.origin, COUNTRY_LABELS)}<br/>
+          Высота: ${f.altitude.toLocaleString()} ft<br/>
+          Скорость: ${f.speed} kts | Курс: ${f.heading}°
+          ${f.squawk ? `<br/>Код Squawk: ${f.squawk}` : ''}
+          <br/><em style="color:#666;font-size:9px;">Нажмите, чтобы показать трек полета</em>
         </div>
       `;
 
@@ -695,8 +709,8 @@ export default function ConflictMap({ className }: MapProps) {
         marker.bindPopup(`
           <div style="font-family:monospace;font-size:11px;color:#000;min-width:180px;">
             <strong style="color:${color}">${ship.name}</strong><br/>
-            ${ship.hull} &bull; ${ship.class}<br/>Type: ${ship.type}<br/>Navy: ${ship.navy}<br/>
-            Status: ${ship.status}<br/>Region: ${ship.region}${ship.group ? `<br/>Group: ${ship.group}` : ''}
+            ${ship.hull} &bull; ${ship.class}<br/>Тип: ${getDisplayLabel(ship.type, NAVAL_TYPE_LABELS)}<br/>Флот: ${getDisplayLabel(ship.navy, NAVY_LABELS)}<br/>
+            Статус: ${getDisplayLabel(ship.status, NAVAL_STATUS_LABELS)}<br/>Регион: ${getDisplayLabel(ship.region, NAVAL_REGION_LABELS)}${ship.group ? `<br/>Группа: ${getDisplayLabel(ship.group, NAVAL_GROUP_LABELS)}` : ''}
           </div>
         `);
         marker.bindTooltip(ship.name, { direction: 'top', offset: [0, -8], className: 'naval-label' });
@@ -737,8 +751,8 @@ export default function ConflictMap({ className }: MapProps) {
       });
       alertCircle.bindPopup(`
         <div style="font-family:monospace;font-size:11px;color:#000;">
-          <strong style="color:red">ACTIVE ALERTS</strong><br/>
-          ${alerts.alerts.map(a => `${a.type}: ${a.threat}`).join('<br/>')}
+          <strong style="color:red">АКТИВНЫЕ ТРЕВОГИ</strong><br/>
+          ${alerts.alerts.map(a => `${getDisplayLabel(a.type, ALERT_TYPE_LABELS)}: ${a.threat}`).join('<br/>')}
         </div>
       `);
       alertLayerRef.current.addLayer(alertCircle);
@@ -751,7 +765,7 @@ export default function ConflictMap({ className }: MapProps) {
             const sirens = L!.circleMarker(coords, {
               radius: 12, color: '#ff3366', fillColor: '#ff3366', fillOpacity: 0.4, weight: 2, className: 'alert-flash',
             });
-            sirens.bindPopup(`<div style="font-family:monospace;font-size:11px;color:#000;"><strong style="color:red">${alert.type}</strong><br/>${loc}<br/>${alert.threat}</div>`);
+            sirens.bindPopup(`<div style="font-family:monospace;font-size:11px;color:#000;"><strong style="color:red">${getDisplayLabel(alert.type, ALERT_TYPE_LABELS)}</strong><br/>${loc}<br/>${alert.threat}</div>`);
             alertLayerRef.current!.addLayer(sirens);
           }
         });
@@ -879,12 +893,12 @@ export default function ConflictMap({ className }: MapProps) {
         geo.coords[1] + (Math.random() - 0.5) * 0.15,
       ];
 
-      const timeStr = new Date(event.date).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const timeStr = new Date(event.date).toLocaleString('ru-RU', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
       const typeColor = event.type === 'MISSILE' ? '#ff0044' : event.type === 'DRONE' ? '#ff6600' : '#ff3300';
       const sourceTag = event.fromTelegram ? '📡 ' : '';
       const popupHtml = `
         <div style="font-family:monospace;font-size:11px;color:#000;min-width:220px;max-width:300px;">
-          <strong style="color:${typeColor};font-size:12px;">${event.type} — ${geo.place}</strong><br/>
+          <strong style="color:${typeColor};font-size:12px;">${getDisplayLabel(event.type, STRIKE_CATEGORY_LABELS)} — ${getDisplayLabel(geo.place, LOCATION_LABELS)}</strong><br/>
           <div style="margin:4px 0;line-height:1.4;">${event.title}</div>
           <em style="color:#666;font-size:9px;">${sourceTag}${event.source} • ${timeStr}</em>
         </div>
@@ -923,7 +937,7 @@ export default function ConflictMap({ className }: MapProps) {
         weight: 1,
         dashArray: '10, 8',
       });
-      circle.bindTooltip(`${site.name}<br/>${site.range}km range`, { className: 'city-label' });
+      circle.bindTooltip(`${site.name}<br/>дальность ${site.range} км`, { className: 'city-label' });
       rangeLayerRef.current!.addLayer(circle);
 
       // Launch site marker
@@ -939,32 +953,32 @@ export default function ConflictMap({ className }: MapProps) {
     <div className={`panel ${className || ''} flex flex-col`}>
       <div className="panel-header shrink-0 flex-wrap-reverse">
         <span className="status-dot" />
-        <span className="shrink-0">THEATER MAP</span>
+        <span className="shrink-0">КАРТА ТЕАТРА</span>
         <div className="ml-auto flex items-center gap-1 flex-wrap justify-end">
           <button onClick={() => setShowMilAir(!showMilAir)} className="text-[8px] px-1.5 py-0.5 rounded border transition-colors"
             style={{ color: showMilAir ? '#00aaff' : 'var(--text-secondary)', borderColor: showMilAir ? '#00aaff' : 'var(--border-color)', background: showMilAir ? 'rgba(0,170,255,0.1)' : 'transparent' }}>
-            ✈ AIR {flights?.military || 0}
+            ✈ АВИА {flights?.military || 0}
           </button>
           <button onClick={() => setShowNaval(!showNaval)} className="text-[8px] px-1.5 py-0.5 rounded border transition-colors"
             style={{ color: showNaval ? '#00d4ff' : 'var(--text-secondary)', borderColor: showNaval ? '#00d4ff' : 'var(--border-color)', background: showNaval ? 'rgba(0,212,255,0.1)' : 'transparent' }}>
-            ⛴ NAV {naval?.ships?.length || 0}
+            ⛴ ФЛОТ {naval?.ships?.length || 0}
           </button>
           <button onClick={() => setShowStrikes(!showStrikes)} className="text-[8px] px-1.5 py-0.5 rounded border transition-colors"
             style={{ color: showStrikes ? '#ff6600' : 'var(--text-secondary)', borderColor: showStrikes ? '#ff6600' : 'var(--border-color)', background: showStrikes ? 'rgba(255,102,0,0.1)' : 'transparent' }}>
-            💥 STRIKES
+            💥 УДАРЫ
           </button>
           <button onClick={() => setShowRangeRings(!showRangeRings)} className="text-[8px] px-1.5 py-0.5 rounded border transition-colors"
             style={{ color: showRangeRings ? '#ff3366' : 'var(--text-secondary)', borderColor: showRangeRings ? '#ff3366' : 'var(--border-color)', background: showRangeRings ? 'rgba(255,51,102,0.1)' : 'transparent' }}>
-            ◎ RANGE
+            ◎ РАДИУС
           </button>
           <button onClick={() => setShowCities(!showCities)} className="text-[8px] px-1.5 py-0.5 rounded border transition-colors"
             style={{ color: showCities ? '#999' : 'var(--text-secondary)', borderColor: showCities ? '#666' : 'var(--border-color)', background: showCities ? 'rgba(150,150,150,0.1)' : 'transparent' }}>
-            CITIES
+            ГОРОДА
           </button>
           <button onClick={() => { setMeasureMode(!measureMode); if (measureMode && measureLayerRef.current) measureLayerRef.current.clearLayers(); }}
             className="text-[8px] px-1.5 py-0.5 rounded border transition-colors"
             style={{ color: measureMode ? '#ffaa00' : 'var(--text-secondary)', borderColor: measureMode ? '#ffaa00' : 'var(--border-color)', background: measureMode ? 'rgba(255,170,0,0.15)' : 'transparent' }}>
-            📏 DIST
+            📏 ДИСТ.
           </button>
         </div>
       </div>
@@ -972,7 +986,7 @@ export default function ConflictMap({ className }: MapProps) {
         {!mounted ? <div className="loading-shimmer w-full h-full" /> : <div id="conflict-map" className="w-full h-full" />}
         {measureMode && (
           <div className="absolute top-2 left-2 z-[1000] text-[9px] px-2 py-1 rounded" style={{ background: 'rgba(10,14,23,0.9)', border: '1px solid #ffaa00', color: '#ffaa00' }}>
-            MEASURE MODE — Click two points to measure distance. Click DIST again to exit.
+            РЕЖИМ ИЗМЕРЕНИЯ — выберите две точки для замера расстояния. Нажмите ДИСТ. ещё раз для выхода.
           </div>
         )}
       </div>

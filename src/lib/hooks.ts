@@ -57,10 +57,10 @@ export function timeAgo(date: string | Date): string {
   const seconds = Math.floor((now.getTime() - then.getTime()) / 1000);
   const abs = Math.abs(seconds);
 
-  if (abs < 60) return 'just now';
-  if (abs < 3600) return `${Math.floor(abs / 60)}m ago`;
-  if (abs < 86400) return `${Math.floor(abs / 3600)}h ago`;
-  return `${Math.floor(abs / 86400)}d ago`;
+  if (abs < 60) return 'только что';
+  if (abs < 3600) return `${Math.floor(abs / 60)} мин назад`;
+  if (abs < 86400) return `${Math.floor(abs / 3600)} ч назад`;
+  return `${Math.floor(abs / 86400)} дн назад`;
 }
 
 export function formatPrice(price: number, decimals: number = 2): string {
