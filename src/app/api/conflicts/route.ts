@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fetchWithTimeout, parseXML, getTextContent } from '@/lib/fetcher';
+import { translateBatch } from '@/lib/hebrew';
 import type { ConflictEvent } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -99,6 +100,16 @@ export async function GET() {
 
   // Sort newest first
   allEvents.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  if (allEvents.length > 0) {
+    const translatedDescriptions = await translateBatch(
+      allEvents.map((event) => event.description),
+      'ru'
+    );
+    allEvents.forEach((event, index) => {
+      event.descriptionDisplay = translatedDescriptions[index] || event.description;
+    });
+  }
 
   return NextResponse.json(allEvents, {
     headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' },

@@ -6,6 +6,7 @@ import { useDataFeed, timeAgo, useTick } from '@/lib/hooks';
 
 interface CountryEvent {
   title: string;
+  titleDisplay?: string;
   source: string;
   time: string;
   url: string;
@@ -167,7 +168,7 @@ export default function RegionalAlertsPanel() {
                       />
                       <div className="min-w-0 flex-1">
                         <p className="text-[10px] leading-tight text-[var(--text-primary)] line-clamp-1">
-                          {event.title}
+                          {event.titleDisplay ?? event.title}
                         </p>
                         <span className="text-[9px] text-[var(--text-secondary)]">
                           {event.source} • {timeAgo(event.time)}

@@ -75,6 +75,7 @@ interface ConflictEvent {
   lat: number;
   lon: number;
   description: string;
+  descriptionDisplay?: string;
   source: string;
 }
 
@@ -84,6 +85,7 @@ interface StrikeData {
   category: string;
   severity: string;
   title: string;
+  titleDisplay?: string;
   source: string;
   url: string;
   country: string;
@@ -561,9 +563,10 @@ export default function ConflictMap({ className }: MapProps) {
         html += `<strong style="color:#ff6600;font-size:10px;">ПОСЛЕДНИЕ СОБЫТИЯ</strong><br/>`;
         recentStrikes.forEach(s => {
           const timeStr = new Date(s.date).toLocaleString('ru-RU', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+          const displayDescription = s.descriptionDisplay ?? s.description;
           html += `<div style="margin:2px 0;font-size:10px;">`;
           html += `<span style="color:${s.type === 'STRIKE' ? '#ff3300' : s.type === 'DRONE' ? '#ff6600' : '#666'};font-weight:bold;">${getDisplayLabel(s.type, CONFLICT_TYPE_LABELS)}</span> `;
-          html += `${s.description.substring(0, 80)}${s.description.length > 80 ? '...' : ''}`;
+          html += `${displayDescription.substring(0, 80)}${displayDescription.length > 80 ? '...' : ''}`;
           html += `<br/><span style="color:#999;font-size:9px;">${s.source} • ${timeStr}</span>`;
           html += `</div>`;
         });
@@ -830,13 +833,19 @@ export default function ConflictMap({ className }: MapProps) {
     const plottedLocations = new Set<string>(); // Dedup Telegram by location
 
     // Merge news data sources into a common format
-    const allStrikes: { title: string; date: string; source: string; type: string; fromTelegram?: boolean }[] = [];
+    const allStrikes: { title: string; displayTitle?: string; date: string; source: string; type: string; fromTelegram?: boolean }[] = [];
 
     // From conflicts API (priority — plotted first)
     if (conflicts) {
       conflicts.forEach(e => {
         if (e.type === 'STRIKE' || e.type === 'DRONE') {
-          allStrikes.push({ title: e.description, date: e.date, source: e.source, type: e.type });
+          allStrikes.push({
+            title: e.description,
+            displayTitle: e.descriptionDisplay ?? e.description,
+            date: e.date,
+            source: e.source,
+            type: e.type,
+          });
         }
       });
     }
@@ -845,7 +854,13 @@ export default function ConflictMap({ className }: MapProps) {
     if (strikes) {
       strikes.forEach(s => {
         if (s.category === 'MISSILE' || s.category === 'STRIKE' || s.category === 'DRONE') {
-          allStrikes.push({ title: s.title, date: s.date, source: s.source, type: s.category });
+          allStrikes.push({
+            title: s.title,
+            displayTitle: s.titleDisplay ?? s.title,
+            date: s.date,
+            source: s.source,
+            type: s.category,
+          });
         }
       });
     }
@@ -868,6 +883,9 @@ export default function ConflictMap({ className }: MapProps) {
 
         allStrikes.push({
           title: post.text.length > 200 ? post.text.substring(0, 200) + '...' : post.text,
+          displayTitle: post.textDisplay?.length
+            ? post.textDisplay.substring(0, 200) + (post.textDisplay.length > 200 ? '...' : '')
+            : undefined,
           date: post.date,
           source: `Telegram: ${post.channelLabelDisplay ?? post.channelLabel}`,
           type,
@@ -904,7 +922,7 @@ export default function ConflictMap({ className }: MapProps) {
       const popupHtml = `
         <div style="font-family:monospace;font-size:11px;color:#000;min-width:220px;max-width:300px;">
           <strong style="color:${typeColor};font-size:12px;">${getDisplayLabel(event.type, STRIKE_CATEGORY_LABELS)} — ${getDisplayLabel(geo.place, LOCATION_LABELS)}</strong><br/>
-          <div style="margin:4px 0;line-height:1.4;">${event.title}</div>
+          <div style="margin:4px 0;line-height:1.4;">${event.displayTitle ?? event.title}</div>
           <em style="color:#666;font-size:9px;">${sourceTag}${event.source} • ${timeStr}</em>
         </div>
       `;

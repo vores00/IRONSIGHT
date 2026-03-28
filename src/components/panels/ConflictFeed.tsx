@@ -66,7 +66,7 @@ export default function ConflictFeed() {
                   </span>
                 </div>
                 <p className="text-[11px] leading-tight text-[var(--text-primary)]">
-                  {event.description}
+                  {event.descriptionDisplay ?? event.description}
                 </p>
                 <span className="text-[8px] text-[var(--text-secondary)]">
                   источник: {event.source}

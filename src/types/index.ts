@@ -1,5 +1,6 @@
 export interface NewsItem {
   title: string;
+  titleDisplay?: string;
   link: string;
   source: string;
   pubDate: string;
@@ -37,6 +38,7 @@ export interface ConflictEvent {
   lat: number;
   lon: number;
   description: string;
+  descriptionDisplay?: string;
   source: string;
   fatalities?: number;
 }

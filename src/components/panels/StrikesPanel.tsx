@@ -9,6 +9,7 @@ interface StrikeEvent {
   category: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
   title: string;
+  titleDisplay?: string;
   source: string;
   url: string;
   country: string;
@@ -114,7 +115,7 @@ export default function StrikesPanel() {
                   </span>
                 </div>
                 <p className="text-[11px] leading-tight text-[var(--text-primary)]">
-                  {strike.title}
+                  {strike.titleDisplay ?? strike.title}
                 </p>
                 <span className="text-[8px] text-[var(--text-secondary)]">
                   {strike.source} • {getDisplayLabel(strike.country, COUNTRY_LABELS)}

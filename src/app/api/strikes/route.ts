@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fetchWithTimeout, parseXML, getTextContent } from '@/lib/fetcher';
+import { translateBatch } from '@/lib/hebrew';
 
 export const dynamic = 'force-dynamic';
 
@@ -77,7 +78,18 @@ export async function GET() {
 
   deduped.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  return NextResponse.json(deduped.slice(0, 25), {
+  const visibleStrikes = deduped.slice(0, 25);
+  if (visibleStrikes.length > 0) {
+    const translatedTitles = await translateBatch(
+      visibleStrikes.map((strike) => strike.title),
+      'ru'
+    );
+    visibleStrikes.forEach((strike, index) => {
+      strike.titleDisplay = translatedTitles[index] || strike.title;
+    });
+  }
+
+  return NextResponse.json(visibleStrikes, {
     headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' },
   });
 }
@@ -88,6 +100,7 @@ interface StrikeEvent {
   category: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
   title: string;
+  titleDisplay?: string;
   source: string;
   url: string;
   country: string;

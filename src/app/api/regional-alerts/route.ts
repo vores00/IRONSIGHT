@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fetchWithTimeout, parseXML, getTextContent } from '@/lib/fetcher';
+import { translateBatch } from '@/lib/hebrew';
 
 export const dynamic = 'force-dynamic';
 
@@ -105,6 +106,7 @@ function getAlertLevel(events: { severity: string; hoursAgo: number }[]): 'CLEAR
 
 interface CountryEvent {
   title: string;
+  titleDisplay?: string;
   source: string;
   time: string;
   url: string;
@@ -182,6 +184,18 @@ export async function GET() {
   // Sort: most active first
   const levelOrder: Record<string, number> = { CRITICAL: 0, ALERT: 1, MONITORING: 2, CLEAR: 3 };
   results.sort((a, b) => (levelOrder[a.level] ?? 3) - (levelOrder[b.level] ?? 3));
+
+  const allTitles = results.flatMap((country) => country.events.map((event) => event.title));
+  if (allTitles.length > 0) {
+    const translatedTitles = await translateBatch(allTitles, 'ru');
+    let translatedIndex = 0;
+    results.forEach((country) => {
+      country.events.forEach((event) => {
+        event.titleDisplay = translatedTitles[translatedIndex] || event.title;
+        translatedIndex += 1;
+      });
+    });
+  }
 
   return NextResponse.json({
     alerts: results,
