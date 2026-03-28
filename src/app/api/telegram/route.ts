@@ -41,12 +41,44 @@ const CHANNELS = [
   { name: 'gulfnewsUAE', label: 'Gulf News', color: '#e6b800' },
 ];
 
+const CHANNEL_LABELS_RU: Record<string, string> = {
+  'IDF Official': 'ЦАХАЛ (официально)',
+  'Rocket Alert': 'Ракетная тревога',
+  'PressTV (Iran)': 'PressTV (Иран)',
+  'OSINT Defender': 'OSINT Defender',
+  'ME Spectator': 'ME Spectator',
+  'Iran Intl': 'Iran Intl',
+  'Alert Israel': 'Alert Israel',
+  'Quds News': 'Quds News',
+  'Times of Israel': 'Times of Israel',
+  'Fars News': 'Fars News',
+  'Fotros Resist.': 'Fotros Resist.',
+  'Al-Saa EN': 'Al-Saa EN',
+  'Warfare Analysis': 'Warfare Analysis',
+  'RN Intel': 'RN Intel',
+  'GeoPol Watch': 'GeoPol Watch',
+  'The Cradle': 'The Cradle',
+  'ME Spectator 2': 'ME Spectator 2',
+  'Hamas-Israel War': 'Война ХАМАС-Израиль',
+  'Tasnim News': 'Tasnim News',
+  'Abu Ali Express': 'Abu Ali Express',
+  'Drop Site News': 'Drop Site News',
+  'France 24': 'France 24',
+  'Saberin (IRGC)': 'Saberin (КСИР)',
+  'DefaPress (Iran MOD)': 'DefaPress (Минобороны Ирана)',
+  'IRGC Official': 'КСИР (официально)',
+  'WAM (UAE)': 'WAM (ОАЭ)',
+  'Gulf News': 'Gulf News',
+};
+
 interface TelegramPost {
   channel: string;
   channelLabel: string;
+  channelLabelDisplay?: string;
   color: string;
   postId: number;
   text: string;
+  textDisplay?: string;
   date: string;
   url: string;
 }
@@ -54,9 +86,9 @@ interface TelegramPost {
 // Persist latest known post IDs across requests (in-memory cache)
 const latestKnownIds: Record<string, number> = {};
 // Cache of fetched posts so we don't re-fetch
-const postCache: Record<string, { text: string; date: string }> = {};
+const postCache: Record<string, { text: string; textDisplay?: string; date: string }> = {};
 
-async function fetchPost(channel: string, postId: number): Promise<{ text: string; date: string } | null> {
+async function fetchPost(channel: string, postId: number): Promise<{ text: string; textDisplay?: string; date: string } | null> {
   const cacheKey = `${channel}/${postId}`;
   if (postCache[cacheKey]) return postCache[cacheKey];
 
@@ -89,12 +121,19 @@ async function fetchPost(channel: string, postId: number): Promise<{ text: strin
 
     if (!text) return null;
 
-    // Auto-translate non-Latin text (Hebrew, Farsi, Arabic, etc.)
+    let textDisplay: string | undefined;
+
+    // Auto-translate non-Latin text for display while preserving English-normalized text
     if (hasNonLatinText(text)) {
-      text = await translateFreeText(text);
+      const [normalizedText, displayText] = await Promise.all([
+        translateFreeText(text, 'en'),
+        translateFreeText(text, 'ru'),
+      ]);
+      text = normalizedText;
+      textDisplay = displayText;
     }
 
-    const result = { text, date };
+    const result = { text, textDisplay, date };
     postCache[cacheKey] = result;
     return result;
   } catch {
@@ -181,9 +220,11 @@ export async function GET() {
           posts.push({
             channel: channel.name,
             channelLabel: channel.label,
+            channelLabelDisplay: CHANNEL_LABELS_RU[channel.label] || channel.label,
             color: channel.color,
             postId: ids[i],
             text: r.value.text,
+            textDisplay: r.value.textDisplay,
             date: r.value.date,
             url: `https://t.me/${channel.name}/${ids[i]}`,
           });
@@ -206,7 +247,7 @@ export async function GET() {
 
   return NextResponse.json({
     posts: allPosts,
-    channels: CHANNELS.map(c => c.label),
+    channels: CHANNELS.map(c => CHANNEL_LABELS_RU[c.label] || c.label),
     updated: new Date().toISOString(),
   }, {
     headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' },

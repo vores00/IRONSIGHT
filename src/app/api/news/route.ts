@@ -144,11 +144,11 @@ export async function GET() {
     .flatMap(r => r.value)
     .filter(isRelevant);
 
-  // Translate Hebrew titles to English
+  // Translate Hebrew titles to Russian
   const hebrewItems = allNews.filter(item => isHebrew(item.title));
   if (hebrewItems.length > 0) {
     const translations = await Promise.allSettled(
-      hebrewItems.map(item => translateFreeText(item.title))
+      hebrewItems.map(item => translateFreeText(item.title, 'ru'))
     );
     translations.forEach((result, i) => {
       if (result.status === 'fulfilled' && result.value !== hebrewItems[i].title) {

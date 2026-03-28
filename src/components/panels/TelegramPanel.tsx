@@ -5,9 +5,11 @@ import { useDataFeed, timeAgo } from '@/lib/hooks';
 interface TelegramPost {
   channel: string;
   channelLabel: string;
+  channelLabelDisplay?: string;
   color: string;
   postId: number;
   text: string;
+  textDisplay?: string;
   date: string;
   url: string;
 }
@@ -59,14 +61,14 @@ export default function TelegramPanel() {
                     border: `1px solid ${post.color}30`,
                   }}
                 >
-                  {post.channelLabel}
+                  {post.channelLabelDisplay ?? post.channelLabel}
                 </span>
                 <span className="text-[9px] text-[var(--text-secondary)] ml-auto shrink-0">
                   {timeAgo(post.date)}
                 </span>
               </div>
               <p className="text-[11px] leading-snug text-[var(--text-primary)] line-clamp-3">
-                {post.text}
+                {post.textDisplay ?? post.text}
               </p>
             </a>
           ))

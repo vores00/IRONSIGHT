@@ -13,7 +13,9 @@ interface AlertData {
     time: string;
     type: string;
     threat: string;
+    threatDisplay?: string;
     locations: string[];
+    locationsDisplay?: string[];
     source: string;
     active: boolean;
   }[];
@@ -61,7 +63,7 @@ export default function AlertsPanel() {
       // Also send browser notification if permitted
       if (Notification.permission === 'granted') {
         new Notification('Тревога IRONSIGHT', {
-          body: `${data.activeCount} активн. тревог - ${getDisplayLabel(data.alerts[0]?.type, ALERT_TYPE_LABELS)}: ${data.alerts[0]?.threat}`,
+          body: `${data.activeCount} активн. тревог - ${getDisplayLabel(data.alerts[0]?.type, ALERT_TYPE_LABELS)}: ${data.alerts[0]?.threatDisplay ?? data.alerts[0]?.threat}`,
           icon: '/favicon.ico',
           tag: 'ironsight-alert',
         });
@@ -155,10 +157,10 @@ export default function AlertsPanel() {
                   </span>
                 </div>
                 <div className="text-[11px] text-[var(--text-primary)]">
-                  {alert.threat}
+                  {alert.threatDisplay ?? alert.threat}
                 </div>
                 <div className="text-[9px] text-[var(--text-secondary)] mt-0.5">
-                  {alert.locations.join(', ')}
+                  {(alert.locationsDisplay ?? alert.locations).join(', ')}
                 </div>
               </div>
             ))}

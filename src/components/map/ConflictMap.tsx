@@ -60,7 +60,9 @@ interface AlertData {
   alerts: {
     type: string;
     threat: string;
+    threatDisplay?: string;
     locations: string[];
+    locationsDisplay?: string[];
     time: string;
   }[];
 }
@@ -91,9 +93,11 @@ interface TelegramData {
   posts: {
     channel: string;
     channelLabel: string;
+    channelLabelDisplay?: string;
     color: string;
     postId: number;
     text: string;
+    textDisplay?: string;
     date: string;
     url: string;
   }[];
@@ -534,7 +538,7 @@ export default function ConflictMap({ className }: MapProps) {
         alerts.alerts.forEach(a => {
           a.locations.forEach(loc => {
             if (loc.toLowerCase().trim() === cityKey) {
-              activeAlerts.push(`${getDisplayLabel(a.type, ALERT_TYPE_LABELS)}: ${a.threat}`);
+              activeAlerts.push(`${getDisplayLabel(a.type, ALERT_TYPE_LABELS)}: ${a.threatDisplay ?? a.threat}`);
             }
           });
         });
@@ -752,20 +756,21 @@ export default function ConflictMap({ className }: MapProps) {
       alertCircle.bindPopup(`
         <div style="font-family:monospace;font-size:11px;color:#000;">
           <strong style="color:red">АКТИВНЫЕ ТРЕВОГИ</strong><br/>
-          ${alerts.alerts.map(a => `${getDisplayLabel(a.type, ALERT_TYPE_LABELS)}: ${a.threat}`).join('<br/>')}
+          ${alerts.alerts.map(a => `${getDisplayLabel(a.type, ALERT_TYPE_LABELS)}: ${a.threatDisplay ?? a.threat}`).join('<br/>')}
         </div>
       `);
       alertLayerRef.current.addLayer(alertCircle);
 
       alerts.alerts.forEach(alert => {
-        alert.locations.forEach(loc => {
+        alert.locations.forEach((loc, index) => {
           const key = loc.toLowerCase().trim();
           const coords = ALERT_CITIES[key];
+          const displayLocation = alert.locationsDisplay?.[index] || loc;
           if (coords) {
             const sirens = L!.circleMarker(coords, {
               radius: 12, color: '#ff3366', fillColor: '#ff3366', fillOpacity: 0.4, weight: 2, className: 'alert-flash',
             });
-            sirens.bindPopup(`<div style="font-family:monospace;font-size:11px;color:#000;"><strong style="color:red">${getDisplayLabel(alert.type, ALERT_TYPE_LABELS)}</strong><br/>${loc}<br/>${alert.threat}</div>`);
+            sirens.bindPopup(`<div style="font-family:monospace;font-size:11px;color:#000;"><strong style="color:red">${getDisplayLabel(alert.type, ALERT_TYPE_LABELS)}</strong><br/>${displayLocation}<br/>${alert.threatDisplay ?? alert.threat}</div>`);
             alertLayerRef.current!.addLayer(sirens);
           }
         });
@@ -864,7 +869,7 @@ export default function ConflictMap({ className }: MapProps) {
         allStrikes.push({
           title: post.text.length > 200 ? post.text.substring(0, 200) + '...' : post.text,
           date: post.date,
-          source: `Telegram: ${post.channelLabel}`,
+          source: `Telegram: ${post.channelLabelDisplay ?? post.channelLabel}`,
           type,
           fromTelegram: true,
         });

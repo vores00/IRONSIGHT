@@ -33,6 +33,7 @@ export async function GET() {
           const rawCities = Array.isArray(alert.cities) ? alert.cities : [alert.data || 'Unknown'];
 
           let translatedThreat = translateHebrew(rawThreat);
+          let threatDisplay = translateHebrew(rawThreat, 'ru');
           const translatedLocations = translateCities(rawCities);
 
           // If the "threat" field is actually a city name (API sometimes puts city in wrong field),
@@ -42,6 +43,7 @@ export async function GET() {
               translatedLocations.push(CITY_TRANSLATIONS[rawThreat]);
             }
             translatedThreat = 'Rocket/Missile Alert';
+            threatDisplay = 'Ракетная тревога';
           }
 
           alerts.push({
@@ -49,6 +51,7 @@ export async function GET() {
             time: alert.date || new Date().toISOString(),
             type: categorizeAlert(rawThreat),
             threat: translatedThreat,
+            threatDisplay,
             threatOriginal: rawThreat,
             locations: translatedLocations,
             locationsOriginal: rawCities,
@@ -65,10 +68,16 @@ export async function GET() {
   // Fallback: use Google Translate for any remaining Hebrew text the dictionary missed
   await Promise.all(alerts.map(async (alert) => {
     if (isHebrew(alert.threat)) {
-      alert.threat = await translateFreeText(alert.threat);
+      alert.threat = await translateFreeText(alert.threat, 'en');
     }
     alert.locations = await Promise.all(
-      alert.locations.map(loc => isHebrew(loc) ? translateFreeText(loc) : Promise.resolve(loc))
+      alert.locations.map(loc => isHebrew(loc) ? translateFreeText(loc, 'en') : Promise.resolve(loc))
+    );
+    if (alert.threatDisplay !== 'Ракетная тревога') {
+      alert.threatDisplay = await translateFreeText(alert.threatOriginal || alert.threat, 'ru');
+    }
+    alert.locationsDisplay = await Promise.all(
+      alert.locations.map(loc => translateFreeText(loc, 'ru'))
     );
   }));
 
@@ -116,8 +125,10 @@ interface AlertEvent {
   time: string;
   type: string;
   threat: string;
+  threatDisplay?: string;
   threatOriginal: string;
   locations: string[];
+  locationsDisplay?: string[];
   locationsOriginal: string[];
   source: string;
   active: boolean;

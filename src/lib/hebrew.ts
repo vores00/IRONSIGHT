@@ -1,10 +1,12 @@
 import CITY_DATA from '../data/city-data.json';
 
-// Hebrew to English translations for Pikud HaOref alert terms
+// Hebrew translations for Pikud HaOref alert terms
 // The alert system uses a fixed vocabulary so a dictionary works perfectly
 
+type TranslationTarget = 'en' | 'ru';
+
 // Threat type translations
-export const THREAT_TRANSLATIONS: Record<string, string> = {
+const THREAT_TRANSLATIONS_EN: Record<string, string> = {
   // Missile threats
   'ירי רקטות וטילים': 'Rocket and Missile Fire',
   'ירי רקטות': 'Rocket Fire',
@@ -46,28 +48,71 @@ export const THREAT_TRANSLATIONS: Record<string, string> = {
   'רחפן': 'Drone',
 };
 
+const THREAT_TRANSLATIONS_RU: Record<string, string> = {
+  // Missile threats
+  'ירי רקטות וטילים': 'Ракетно-ракетный обстрел',
+  'ירי רקטות': 'Ракетный обстрел',
+  'ירי טילים': 'Ракетный удар',
+  'טיל בליסטי': 'Баллистическая ракета',
+  'טילים': 'Ракеты',
+  'רקטות': 'Ракеты',
+
+  // Drone/UAV threats
+  'חדירת כלי טיס עוין': 'Проникновение вражеского летательного аппарата',
+  'חדירת כטבם': 'Проникновение БПЛА',
+  'כלי טיס עוין': 'Вражеский летательный аппарат',
+  'כטבם': 'БПЛА/дрон',
+  'כטב"ם': 'БПЛА/дрон',
+
+  // Ground threats
+  'חדירת מחבלים': 'Проникновение террористов',
+  'חדירה': 'Проникновение',
+
+  // Other threats
+  'רעידת אדמה': 'Землетрясение',
+  'צונמי': 'Цунами',
+  'חומרים מסוכנים': 'Опасные вещества',
+  'אירוע חומרים מסוכנים': 'Инцидент с опасными веществами',
+  'אירוע רדיולוגי': 'Радиологическое событие',
+  'התרעה': 'Тревога',
+  'התרעת צבע אדום': 'Предупреждение "Цева Адом"',
+  'צבע אדום': 'Цева Адом',
+
+  // Instructions
+  'היכנסו למרחב המוגן': 'Перейдите в защищенное помещение',
+  'היכנסו למבנה': 'Зайдите в здание',
+
+  // Military/weapon terms for partial matching
+  'טיל': 'Ракета',
+  'מטוס': 'Самолет',
+  'מסוק': 'Вертолет',
+  'מל"ט': 'Дрон',
+  'רחפן': 'Дрон',
+};
+
 // Israeli locality translations - 1,266 official localities from Israel CBS (data.gov.il)
 // plus custom additions for regions, alert-specific terms, and alternate spellings
 export const CITY_TRANSLATIONS: Record<string, string> = CITY_DATA;
 
 /**
- * Translate a Hebrew string to English using the lookup tables.
+ * Translate a Hebrew string using the lookup tables.
  * Falls back to the original string if no translation is found.
  */
-export function translateHebrew(text: string): string {
+export function translateHebrew(text: string, target: TranslationTarget = 'en'): string {
   if (!text) return text;
+  const threatTranslations = target === 'ru' ? THREAT_TRANSLATIONS_RU : THREAT_TRANSLATIONS_EN;
 
   // Check for exact match in threat translations
-  if (THREAT_TRANSLATIONS[text]) return THREAT_TRANSLATIONS[text];
+  if (threatTranslations[text]) return threatTranslations[text];
 
   // Check for exact match in city translations
   if (CITY_TRANSLATIONS[text]) return CITY_TRANSLATIONS[text];
 
   // Try partial matching - replace known Hebrew terms within the string
   let translated = text;
-  for (const [heb, eng] of Object.entries(THREAT_TRANSLATIONS)) {
+  for (const [heb, replacement] of Object.entries(threatTranslations)) {
     if (translated.includes(heb)) {
-      translated = translated.replace(heb, eng);
+      translated = translated.replace(heb, replacement);
     }
   }
   for (const [heb, eng] of Object.entries(CITY_TRANSLATIONS)) {
@@ -94,15 +139,19 @@ export function isHebrew(text: string): boolean {
 }
 
 /**
- * Translate free-form text to English using Google Translate (free, no key)
+ * Translate free-form text using Google Translate (free, no key)
  * Supports auto-detection of Hebrew, Arabic, Farsi
  * Falls back to original text on failure
  */
-export async function translateFreeText(text: string): Promise<string> {
+const FREE_TEXT_TRANSLATION_CACHE: Record<string, string> = {};
+
+export async function translateFreeText(text: string, target: TranslationTarget = 'en'): Promise<string> {
   if (!text) return text;
+  const cacheKey = `${target}:${text}`;
+  if (FREE_TEXT_TRANSLATION_CACHE[cacheKey]) return FREE_TEXT_TRANSLATION_CACHE[cacheKey];
 
   try {
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(text)}`;
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${target}&dt=t&q=${encodeURIComponent(text)}`;
 
     const res = await fetch(url, {
       signal: AbortSignal.timeout(3000),
@@ -113,18 +162,20 @@ export async function translateFreeText(text: string): Promise<string> {
 
     const data = await res.json();
     const translated = (data[0] as [string][]).map((part: [string]) => part[0]).join('');
-    return translated || text;
+    const result = translated || text;
+    FREE_TEXT_TRANSLATION_CACHE[cacheKey] = result;
+    return result;
   } catch {
     return text;
   }
 }
 
 /**
- * Batch translate multiple Hebrew strings
+ * Batch translate multiple strings to the selected target language
  */
-export async function translateBatch(texts: string[]): Promise<string[]> {
+export async function translateBatch(texts: string[], target: TranslationTarget = 'en'): Promise<string[]> {
   const results = await Promise.allSettled(
-    texts.map(t => translateFreeText(t))
+    texts.map(t => translateFreeText(t, target))
   );
   return results.map((r, i) =>
     r.status === 'fulfilled' ? r.value : texts[i]
