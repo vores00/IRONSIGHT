@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { translateBatch } from '@/lib/hebrew';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +25,20 @@ interface PolymarketMarket {
   image: string;
 }
 
+interface PolymarketMarketView {
+  id: string;
+  question: string;
+  questionDisplay?: string;
+  slug: string;
+  outcomes: { label: string; price: number }[];
+  volume24hr: number;
+  volumeTotal: number;
+  liquidity: number;
+  endDate: string;
+  oneDayPriceChange: number;
+  image: string;
+}
+
 export async function GET() {
   try {
     const res = await fetch(
@@ -40,7 +55,7 @@ export async function GET() {
 
     const data: PolymarketMarket[] = await res.json();
 
-    const filtered = data
+    const filtered: PolymarketMarketView[] = data
       .filter(m => KEYWORDS.test(m.question) && !EXCLUDE.test(m.question))
       .map(m => {
         const outcomes = JSON.parse(m.outcomes) as string[];
@@ -68,6 +83,16 @@ export async function GET() {
         return bYes - aYes;
       })
       .slice(0, 20);
+
+    if (filtered.length > 0) {
+      const translatedQuestions = await translateBatch(
+        filtered.map((market) => market.question),
+        'ru'
+      );
+      filtered.forEach((market, index) => {
+        market.questionDisplay = translatedQuestions[index] || market.question;
+      });
+    }
 
     return NextResponse.json({
       markets: filtered,

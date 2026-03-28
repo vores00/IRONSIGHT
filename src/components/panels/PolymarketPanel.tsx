@@ -10,6 +10,7 @@ interface MarketOutcome {
 interface Market {
   id: string;
   question: string;
+  questionDisplay?: string;
   slug: string;
   outcomes: MarketOutcome[];
   volume24hr: number;
@@ -69,7 +70,7 @@ export default function PolymarketPanel() {
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <div className="text-[10px] text-[var(--text-primary)] leading-tight">
-                      {market.question}
+                      {market.questionDisplay ?? market.question}
                     </div>
                     <div className="text-[8px] text-[var(--text-secondary)] mt-0.5">
                       Объем: {formatVolume(market.volume24hr)} 24ч
