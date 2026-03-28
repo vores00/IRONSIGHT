@@ -123,7 +123,7 @@ async function fetchPost(channel: string, postId: number): Promise<{ text: strin
 
     let textDisplay: string | undefined;
 
-    // Auto-translate non-Latin text for display while preserving English-normalized text
+    // Keep raw text English-friendly for logic, but always populate Russian display text.
     if (hasNonLatinText(text)) {
       const [normalizedText, displayText] = await Promise.all([
         translateFreeText(text, 'en'),
@@ -131,6 +131,8 @@ async function fetchPost(channel: string, postId: number): Promise<{ text: strin
       ]);
       text = normalizedText;
       textDisplay = displayText;
+    } else {
+      textDisplay = await translateFreeText(text, 'ru');
     }
 
     const result = { text, textDisplay, date };

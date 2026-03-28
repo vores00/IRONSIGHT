@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fetchWithTimeout, parseXML, getTextContent } from '@/lib/fetcher';
-import { isHebrew, translateFreeText } from '@/lib/hebrew';
+import { translateBatch } from '@/lib/hebrew';
 import type { NewsItem } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -144,19 +144,6 @@ export async function GET() {
     .flatMap(r => r.value)
     .filter(isRelevant);
 
-  // Translate Hebrew titles to Russian
-  const hebrewItems = allNews.filter(item => isHebrew(item.title));
-  if (hebrewItems.length > 0) {
-    const translations = await Promise.allSettled(
-      hebrewItems.map(item => translateFreeText(item.title, 'ru'))
-    );
-    translations.forEach((result, i) => {
-      if (result.status === 'fulfilled' && result.value !== hebrewItems[i].title) {
-        hebrewItems[i].title = result.value;
-      }
-    });
-  }
-
   // Deduplicate by title similarity (exact match after lowercasing)
   const seen = new Set<string>();
   const deduped = allNews.filter(item => {
@@ -174,7 +161,18 @@ export async function GET() {
     return distA - distB;
   });
 
-  return NextResponse.json(deduped.slice(0, 100), {
+  const visibleNews = deduped.slice(0, 100);
+  if (visibleNews.length > 0) {
+    const translatedTitles = await translateBatch(
+      visibleNews.map(item => item.title),
+      'ru'
+    );
+    visibleNews.forEach((item, i) => {
+      item.title = translatedTitles[i] || item.title;
+    });
+  }
+
+  return NextResponse.json(visibleNews, {
     headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' },
   });
 }
